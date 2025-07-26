@@ -4,18 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Filme vs One Piece</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">One Cálculo</div>
-            <div class="subtitle">Quantos episódios cabem no tempo de um filme?</div>
-        </header>
+    <div class="one-piece-theme">
+        <div class="header">
+            <img src="https://media.tenor.com/3wtHU0d9Pm8AAAAm/luffy-strawhat.webp" class="straw-hat" alt="Chapéu de Palha">
+            <h1><img src="https://logos-world.net/wp-content/uploads/2021/09/One-Piece-Logo.png" alt="One Piece" class="logo"></h1>
+            <p class="subtitle">Quantos episódios cabem no tempo de um filme?</p>
+        </div>
         
-        <main>
+        <div class="content">
             <div class="search-box">
                 <input type="text" id="movieSearch" placeholder="Digite um filme...">
                 <button id="searchButton">
@@ -23,17 +24,17 @@
                 </button>
             </div>
             
-            <div class="results" id="results">
-                <div class="initial-message">
-                    <i class="fas fa-flag"></i>
-                    <p>Busque um filme para começar!</p>
+            <div id="results" class="results">
+                <div class="initial-state">
+                    <img src="https://logos-world.net/wp-content/uploads/2023/03/Straw-Hat-Logo.png" class="luffy-img" alt="Luffy">
+                    <p>Busque um filme para descobrir!</p>
                 </div>
             </div>
-        </main>
+        </div>
         
-        <footer>
-            <p>Dados de filmes: TMDB | One Piece © Eiichiro Oda</p>
-        </footer>
+        <div class="footer">
+            <p>Dados de filmes: TMDB | One Piece © rRondas</p>
+        </div>
     </div>
 
     <script src="JS/script.js"></script>
