@@ -1,66 +1,59 @@
-const API_KEY = '9dc4fbf1b311b95209a262062220cca2';
-const API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGM0ZmJmMWIzMTFiOTUyMDlhMjYyMDYyMjIwY2NhMiIsInN1YiI6IjY4ODQzMzZmNmEzODA0YzIwZTE2YjllZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._wsj-xGue5fRNzh7iAcVIi1O01K5vPTawM-0bVHJSy4'; // Token de acesso v4
+// Configurações da API
+const API_KEY = '9dc4fbf1b311b95209a262062220cca2'; // Chave V3
+const API_READ_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGM0ZmJmMWIzMTFiOTUyMDlhMjYyMDYyMjIwY2NhMiIsInN1YiI6IjY4ODQzMzZmNmEzODA0YzIwZTE2YjllZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._wsj-xGue5fRNzh7iAcVIi1O01K5vPTawM-0bVHJSy4'; // Token V4
 
-document.getElementById('searchButton').addEventListener('click', async () => {
-    const query = document.getElementById('movieSearch').value.trim();
-    if (!query) return alert("Digite um filme!");
-
+// Função para buscar filmes
+async function searchMovies(query) {
     try {
+        // Mostra loading
         document.getElementById('results').innerHTML = `
             <div class="loading">
-                <i class="fas fa-spinner"></i>
+                <i class="fas fa-spinner fa-spin"></i>
                 <p>Procurando "${query}"...</p>
             </div>
         `;
 
-        // 1. Busca o ID do filme
+        // 1. Busca o filme (usando API KEY V3)
         const searchResponse = await fetch(
-            `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&language=pt-BR&page=1`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${API_TOKEN}`,
-                    'accept': 'application/json'
-                }
-            }
+            `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=pt-BR`
         );
 
-        if (!searchResponse.ok) throw new Error('Filme não encontrado');
+        if (!searchResponse.ok) throw new Error(`Erro na busca: ${searchResponse.status}`);
         
         const searchData = await searchResponse.json();
-        if (!searchData.results || searchData.results.length === 0) {
-            throw new Error('Nenhum filme encontrado');
-        }
+        if (!searchData.results.length) throw new Error("Nenhum filme encontrado");
 
-        // 2. Pega os detalhes (incluindo duração)
+        // 2. Pega os detalhes (usando TOKEN V4)
         const movieId = searchData.results[0].id;
         const detailsResponse = await fetch(
             `https://api.themoviedb.org/3/movie/${movieId}?language=pt-BR`,
             {
                 headers: {
-                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'Authorization': `Bearer ${API_READ_TOKEN}`,
                     'accept': 'application/json'
                 }
             }
         );
 
-        if (!detailsResponse.ok) throw new Error('Erro ao buscar detalhes');
+        if (!detailsResponse.ok) throw new Error(`Erro nos detalhes: ${detailsResponse.status}`);
         
         const movie = await detailsResponse.json();
         showResults(movie);
 
     } catch (error) {
-        console.error("Erro:", error);
+        console.error("Erro completo:", error);
         document.getElementById('results').innerHTML = `
             <div class="error">
                 <i class="fas fa-exclamation-triangle"></i>
-                <h3>Erro!</h3>
                 <p>${error.message}</p>
+                <small>Tente filmes como: "Vingadores", "Titanic"</small>
                 <button onclick="window.location.reload()">Tentar novamente</button>
             </div>
         `;
     }
-});
+}
 
+// Função para mostrar resultados
 function showResults(movie) {
     const duration = movie.runtime || 120; // Fallback se não tiver duração
     const episodes = (duration / 24).toFixed(1);
@@ -77,14 +70,18 @@ function showResults(movie) {
             
             <div class="comparison">
                 <p><i class="fas fa-skull-crossbones"></i> <strong>${episodes}</strong> episódios de One Piece!</p>
-                <p>Você poderia assistir:</p>
-                
                 <div class="episodes-container">
                     ${Array(fullEpisodes).fill().map((_, i) => `<div class="episode">${i+1}</div>`).join('')}
                 </div>
-                
-                <p><small>Cada episódio tem ~24 minutos</small></p>
+                <small>(${fullEpisodes} completos + ${Math.round((duration % 24))} min do próximo)</small>
             </div>
         </div>
     `;
 }
+
+// Evento de busca
+document.getElementById('searchButton').addEventListener('click', () => {
+    const query = document.getElementById('movieSearch').value.trim();
+    if (query) searchMovies(query);
+    else alert("Digite um filme!");
+});
