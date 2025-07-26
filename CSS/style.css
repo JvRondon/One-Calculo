@@ -1,62 +1,61 @@
-* {
+/* Estilo Temático de One Piece */
+body {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-}
-
-body {
     font-family: 'Roboto', sans-serif;
-    background: #0a0a2a;
+    background-color: #0a0a2a;
     color: #fff;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background-image: url('https://images6.alphacoders.com/134/thumb-1920-1346719.jpeg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+}
+
+.one-piece-theme {
+    max-width: 800px;
+    margin: 0 auto;
     padding: 20px;
-    background-image: 
-        radial-gradient(circle at 20% 30%, rgba(255, 87, 34, 0.1) 0%, transparent 20%),
-        radial-gradient(circle at 80% 70%, rgba(255, 204, 0, 0.1) 0%, transparent 20%);
+    background-color: rgba(15, 15, 60, 0.85);
+    min-height: 100vh;
+    position: relative;
 }
 
-.container {
-    width: 100%;
-    max-width: 600px;
-    background: rgba(15, 15, 60, 0.9);
-    border: 3px solid #ff5722;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-}
-
-header {
+.header {
     text-align: center;
-    margin-bottom: 25px;
+    padding: 20px 0;
+    position: relative;
+}
+
+.straw-hat {
+    position: absolute;
+    width: 80px;
+    top: 10px;
+    right: 20px;
+    animation: float 6s ease-in-out infinite;
 }
 
 .logo {
-    font-family: 'Pirata One', cursive;
-    font-size: 2.5rem;
-    color: #ff5722;
-    text-shadow: 2px 2px 0 #000;
-    letter-spacing: 2px;
-    margin-bottom: 5px;
+    max-width: 300px;
+    margin: 0 auto;
+    filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.7));
 }
 
 .subtitle {
-    font-size: 1rem;
     color: #ffcc00;
-    margin-bottom: 5px;
+    font-size: 1.2rem;
+    margin-top: -10px;
+    font-style: italic;
 }
 
 .search-box {
     display: flex;
     gap: 10px;
-    margin-bottom: 25px;
+    margin: 30px 0;
 }
 
 #movieSearch {
     flex: 1;
-    padding: 12px 15px;
+    padding: 15px;
     border: 2px solid #ff5722;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.9);
@@ -64,88 +63,61 @@ header {
 }
 
 #searchButton {
-    padding: 0 20px;
-    background: #ff5722;
+    padding: 0 25px;
+    background: linear-gradient(to bottom, #ff5722, #e64a19);
     color: white;
     border: none;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s;
+    font-size: 1rem;
 }
 
 #searchButton:hover {
-    background: #ff8a50;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 87, 34, 0.5);
 }
 
 .results {
-    min-height: 200px;
-    background: rgba(0, 0, 0, 0.3);
+    min-height: 300px;
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    border: 2px solid #ffcc00;
 }
 
-.initial-message {
+.initial-state {
     text-align: center;
-    color: #aaa;
+    padding: 20px;
 }
 
-.initial-message i {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    color: #ff5722;
+.initial-state .luffy-img {
+    max-width: 200px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 3px solid #ff5722;
 }
 
 .movie-result {
-    width: 100%;
+    display: none;
     text-align: center;
 }
 
 .movie-poster {
-    width: 120px;
-    height: 180px;
+    max-width: 200px;
     border-radius: 8px;
     border: 3px solid #ff5722;
-    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     margin-bottom: 15px;
 }
 
-.movie-title {
-    font-size: 1.3rem;
-    color: #ffcc00;
-    margin-bottom: 10px;
-}
-
-.movie-duration {
-    font-size: 1.1rem;
-    color: #ff5722;
-    margin-bottom: 15px;
-}
-
-.comparison {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    margin: 15px 0;
-}
-
-.comparison-item {
-    text-align: center;
-}
-
-.comparison-value {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #ff5722;
-}
-
-.comparison-label {
-    font-size: 0.9rem;
-    color: #aaa;
+.comparison-result {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 204, 0, 0.1);
+    border-radius: 8px;
+    border: 1px dashed #ffcc00;
 }
 
 .episodes-container {
@@ -157,31 +129,38 @@ header {
 }
 
 .episode {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     background: #ff5722;
+    color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    font-size: 0.8rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-footer {
+.footer {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 204, 0, 0.3);
+    color: #aaa;
     font-size: 0.8rem;
-    color: #666;
 }
 
+/* Animações */
+@keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Responsivo */
 @media (max-width: 600px) {
-    .container {
-        padding: 15px;
-    }
-    
     .logo {
-        font-size: 2rem;
+        max-width: 200px;
     }
     
     .search-box {
