@@ -1,118 +1,89 @@
-// Configuração da API TMDB
 const API_KEY = '9dc4fbf1b311b95209a262062220cca2';
-const API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGM0ZmJmMWIzMTFiOTUyMDlhMjYyMDYyMjIwY2NhMiIsIm5iZiI6MTc1MzQ5NDM4My4yNjQsInN1YiI6IjY4ODQzMzZmNmEzODA0YzIwZTE2YjllZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._wsj-xGue5fRNzh7iAcVIi1O01K5vPTawM-0bVHJSy4';
-const API_URL = 'https://api.themoviedb.org/3';
+const API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGM0ZmJmMWIzMTFiOTUyMDlhMjYyMDYyMjIwY2NhMiIsInN1YiI6IjY4ODQzMzZmNmEzODA0YzIwZTE2YjllZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._wsj-xGue5fRNzh7iAcVIi1O01K5vPTawM-0bVHJSy4';
 
-// Elementos DOM
-const searchButton = document.getElementById('searchButton');
-const movieSearch = document.getElementById('movieSearch');
-const resultsDiv = document.getElementById('results');
+document.getElementById('searchButton').addEventListener('click', async () => {
+    const query = document.getElementById('movieSearch').value.trim();
+    if (!query) return alert("Digite um filme!");
 
-// Busca filmes na API
-async function searchMovies(query) {
-  try {
-    const options = {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        Authorization: `Bearer ${API_TOKEN}`
-      }
-    };
-    
-    const response = await fetch(`${API_URL}/search/movie?query=${query}&language=pt-BR`, options);
-    const data = await response.json();
-    return data.results;
-  } catch (error) {
-    console.error("Erro ao buscar filmes:", error);
-    return [];
-  }
-}
+    try {
+        document.getElementById('results').innerHTML = `
+            <div class="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Procurando "${query}"...</p>
+            </div>
+        `;
 
-// Calcula episódios de One Piece
-function calculateOnePieceEpisodes(movieDuration) {
-    const onePieceEpisodeDuration = 20; // minutos por episódio
-    return movieDuration / onePieceEpisodeDuration;
-}
+        const options = {
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+                Authorization: `Bearer ${API_TOKEN}`
+            }
+        };
 
-// Exibe os resultados na página
-function displayResults(movie) {
-    const episodes = calculateOnePieceEpisodes(movie.runtime);
-    const fullEpisodes = Math.floor(episodes);
-    const remainingMinutes = Math.floor((episodes - fullEpisodes) * 24);
-    
-    // Criar elementos de episódios
-    let episodesHTML = '';
-    for (let i = 1; i <= fullEpisodes; i++) {
-        episodesHTML += `<div class="episode">${i}</div>`;
+        const searchResponse = await fetch(
+            `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&language=pt-BR&page=1`,
+            options
+        );
+
+        if (!searchResponse.ok) throw new Error(`Erro: ${searchResponse.status}`);
+        
+        const searchData = await searchResponse.json();
+        if (!searchData.results.length) throw new Error("Nenhum filme encontrado");
+
+        const movieId = searchData.results[0].id;
+        const detailsResponse = await fetch(
+            `https://api.themoviedb.org/3/movie/${movieId}?language=pt-BR`,
+            options
+        );
+
+        if (!detailsResponse.ok) throw new Error("Erro ao buscar detalhes");
+        
+        const movie = await detailsResponse.json();
+        showResults(movie);
+
+    } catch (error) {
+        console.error("Erro:", error);
+        document.getElementById('results').innerHTML = `
+            <div class="error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Erro!</h3>
+                <p>${error.message}</p>
+                <button onclick="window.location.reload()">Tentar novamente</button>
+            </div>
+        `;
     }
-    
-    // Atualizar o DOM
-    resultsDiv.innerHTML = `
+});
+
+function showResults(movie) {
+    const duration = movie.runtime || 120;
+    const episodes = (duration / 24).toFixed(1);
+    const fullEpisodes = Math.floor(duration / 24);
+    const remainingMinutes = Math.round((duration % 24));
+
+    document.getElementById('results').innerHTML = `
         <div class="movie-result">
-            <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" 
+            <img src="${movie.poster_path ? `https://image.tmdb.org/t/p/w300${movie.poster_path}` : 'https://i.imgur.com/JuMqQEg.png'}" 
                  alt="${movie.title}" 
                  class="movie-poster"
-                 onerror="this.src='https://via.placeholder.com/120x180?text=Poster+Não+Disponível'">
-            <h3 class="movie-title">${movie.title}</h3>
-            <div class="movie-duration">${movie.runtime} minutos</div>
+                 onerror="this.src='https://i.imgur.com/JuMqQEg.png'">
+            <h2>${movie.title}</h2>
+            <p><i class="fas fa-clock"></i> ${duration} minutos de filme</p>
             
-            <div class="comparison">
-                <div class="comparison-item">
-                    <div class="comparison-value">${episodes.toFixed(1)}</div>
-                    <div class="comparison-label">episódios</div>
+            <div class="comparison-result">
+                <h3><i class="fas fa-skull-crossbones"></i> ${episodes} episódios de One Piece!</h3>
+                <p>Você poderia assistir:</p>
+                
+                <div class="episodes-container">
+                    ${Array(fullEpisodes).fill().map((_, i) => `<div class="episode">${i+1}</div>`).join('')}
                 </div>
-                <div class="comparison-item">
-                    <div class="comparison-value">${fullEpisodes}</div>
-                    <div class="comparison-label">completos</div>
-                </div>
+                
+                ${remainingMinutes > 0 ? 
+                  `<p><small>+ ${remainingMinutes} minutos do próximo episódio</small></p>` : 
+                  '<p><small>Tempo exato para episódios completos!</small></p>'}
+                
+                <p class="info"><i class="fas fa-info-circle"></i> Cada episódio tem ~24 minutos</p>
             </div>
-            
-            <div class="episodes-container">${episodesHTML}</div>
         </div>
     `;
 }
-
-// Evento de busca
-searchButton.addEventListener('click', async () => {
-    const query = movieSearch.value.trim();
-    
-    if (!query) {
-        alert("Por favor, digite um filme!");
-        return;
-    }
-    
-    // Mostrar mensagem de carregamento
-    resultsDiv.innerHTML = '<div class="initial-message"><i class="fas fa-spinner fa-spin"></i><p>Buscando filme...</p></div>';
-    
-    const movies = await searchMovies(query);
-    
-    if (movies.length === 0) {
-        resultsDiv.innerHTML = '<div class="initial-message"><i class="fas fa-times-circle"></i><p>Nenhum filme encontrado. Tente outro nome!</p></div>';
-        return;
-    }
-    
-    // Pega o primeiro filme da lista
-    const movie = movies[0];
-    
-    // Se o filme não tiver duração, busca detalhes completos
-    if (!movie.runtime) {
-        const movieDetails = await fetch(
-            `${API_URL}/movie/${movie.id}?api_key=${API_KEY}&language=pt-BR`
-        ).then(res => res.json());
-        movie.runtime = movieDetails.runtime;
-    }
-    
-    // Se ainda não tiver duração, usa um valor padrão
-    if (!movie.runtime) {
-        movie.runtime = 120; // 2 horas padrão
-    }
-    
-    displayResults(movie);
-});
-
-// Pesquisar ao pressionar Enter
-movieSearch.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        searchButton.click();
-    }
-});
