@@ -1,5 +1,6 @@
 // Configuração da API TMDB
-const API_KEY = 'SUA_CHAVE_API_TMDB'; // Substitua pela sua chave!
+const API_KEY = '9dc4fbf1b311b95209a262062220cca2';
+const API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGM0ZmJmMWIzMTFiOTUyMDlhMjYyMDYyMjIwY2NhMiIsIm5iZiI6MTc1MzQ5NDM4My4yNjQsInN1YiI6IjY4ODQzMzZmNmEzODA0YzIwZTE2YjllZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._wsj-xGue5fRNzh7iAcVIi1O01K5vPTawM-0bVHJSy4';
 const API_URL = 'https://api.themoviedb.org/3';
 
 // Elementos DOM
@@ -9,21 +10,27 @@ const resultsDiv = document.getElementById('results');
 
 // Busca filmes na API
 async function searchMovies(query) {
-    try {
-        const response = await fetch(
-            `${API_URL}/search/movie?api_key=${API_KEY}&query=${query}&language=pt-BR`
-        );
-        const data = await response.json();
-        return data.results;
-    } catch (error) {
-        console.error("Erro ao buscar filmes:", error);
-        return [];
-    }
+  try {
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        Authorization: `Bearer ${API_TOKEN}`
+      }
+    };
+    
+    const response = await fetch(`${API_URL}/search/movie?query=${query}&language=pt-BR`, options);
+    const data = await response.json();
+    return data.results;
+  } catch (error) {
+    console.error("Erro ao buscar filmes:", error);
+    return [];
+  }
 }
 
 // Calcula episódios de One Piece
 function calculateOnePieceEpisodes(movieDuration) {
-    const onePieceEpisodeDuration = 24; // minutos por episódio
+    const onePieceEpisodeDuration = 20; // minutos por episódio
     return movieDuration / onePieceEpisodeDuration;
 }
 
