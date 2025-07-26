@@ -1,5 +1,5 @@
 const API_KEY = '9dc4fbf1b311b95209a262062220cca2';
-const API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGM0ZmJmMWIzMTFiOTUyMDlhMjYyMDYyMjIwY2NhMiIsInN1YiI6IjY4ODQzMzZmNmEzODA0YzIwZTE2YjllZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._wsj-xGue5fRNzh7iAcVIi1O01K5vPTawM-0bVHJSy4';
+const API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGM0ZmJmMWIzMTFiOTUyMDlhMjYyMDYyMjIwY2NhMiIsInN1YiI6IjY4ODQzMzZmNmEzODA0YzIwZTE2YjllZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._wsj-xGue5fRNzh7iAcVIi1O01K5vPTawM-0bVHJSy4'; // Token de acesso v4
 
 document.getElementById('searchButton').addEventListener('click', async () => {
     const query = document.getElementById('movieSearch').value.trim();
@@ -8,36 +8,42 @@ document.getElementById('searchButton').addEventListener('click', async () => {
     try {
         document.getElementById('results').innerHTML = `
             <div class="loading">
-                <i class="fas fa-spinner fa-spin"></i>
+                <i class="fas fa-spinner"></i>
                 <p>Procurando "${query}"...</p>
             </div>
         `;
 
-        const options = {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                Authorization: `Bearer ${API_TOKEN}`
-            }
-        };
-
+        // 1. Busca o ID do filme
         const searchResponse = await fetch(
             `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&language=pt-BR&page=1`,
-            options
+            {
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'accept': 'application/json'
+                }
+            }
         );
 
-        if (!searchResponse.ok) throw new Error(`Erro: ${searchResponse.status}`);
+        if (!searchResponse.ok) throw new Error('Filme não encontrado');
         
         const searchData = await searchResponse.json();
-        if (!searchData.results.length) throw new Error("Nenhum filme encontrado");
+        if (!searchData.results || searchData.results.length === 0) {
+            throw new Error('Nenhum filme encontrado');
+        }
 
+        // 2. Pega os detalhes (incluindo duração)
         const movieId = searchData.results[0].id;
         const detailsResponse = await fetch(
             `https://api.themoviedb.org/3/movie/${movieId}?language=pt-BR`,
-            options
+            {
+                headers: {
+                    'Authorization': `Bearer ${API_TOKEN}`,
+                    'accept': 'application/json'
+                }
+            }
         );
 
-        if (!detailsResponse.ok) throw new Error("Erro ao buscar detalhes");
+        if (!detailsResponse.ok) throw new Error('Erro ao buscar detalhes');
         
         const movie = await detailsResponse.json();
         showResults(movie);
@@ -56,10 +62,9 @@ document.getElementById('searchButton').addEventListener('click', async () => {
 });
 
 function showResults(movie) {
-    const duration = movie.runtime || 120;
+    const duration = movie.runtime || 120; // Fallback se não tiver duração
     const episodes = (duration / 24).toFixed(1);
     const fullEpisodes = Math.floor(duration / 24);
-    const remainingMinutes = Math.round((duration % 24));
 
     document.getElementById('results').innerHTML = `
         <div class="movie-result">
@@ -68,21 +73,17 @@ function showResults(movie) {
                  class="movie-poster"
                  onerror="this.src='https://i.imgur.com/JuMqQEg.png'">
             <h2>${movie.title}</h2>
-            <p><i class="fas fa-clock"></i> ${duration} minutos de filme</p>
+            <p><i class="fas fa-clock"></i> ${duration} minutos</p>
             
-            <div class="comparison-result">
-                <h3><i class="fas fa-skull-crossbones"></i> ${episodes} episódios de One Piece!</h3>
+            <div class="comparison">
+                <p><i class="fas fa-skull-crossbones"></i> <strong>${episodes}</strong> episódios de One Piece!</p>
                 <p>Você poderia assistir:</p>
                 
                 <div class="episodes-container">
                     ${Array(fullEpisodes).fill().map((_, i) => `<div class="episode">${i+1}</div>`).join('')}
                 </div>
                 
-                ${remainingMinutes > 0 ? 
-                  `<p><small>+ ${remainingMinutes} minutos do próximo episódio</small></p>` : 
-                  '<p><small>Tempo exato para episódios completos!</small></p>'}
-                
-                <p class="info"><i class="fas fa-info-circle"></i> Cada episódio tem ~24 minutos</p>
+                <p><small>Cada episódio tem ~24 minutos</small></p>
             </div>
         </div>
     `;
