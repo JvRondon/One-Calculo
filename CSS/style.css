@@ -163,14 +163,7 @@ body {
         max-width: 200px;
     }
     
-    .search-box {
-        flex-direction: column;
-        display: flex;
-        gap: 10px;
-        margin: 30px 0;
-        position: relative
-        
-    }
+ 
     
     #searchButton {
         padding: 12px;
@@ -222,16 +215,25 @@ body {
     color: #666;
     font-style: italic;
 }
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+    position: relative; /* importante para sugestões */
+}
+
 .suggestions-list {
     list-style: none;
     margin: 0;
     padding: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.95);
     border: 1px solid #ff5722;
     border-radius: 8px;
     position: absolute;
+    top: 100%;
+    left: 0;
     width: 100%;
-    z-index: 10;
+    z-index: 999;
     max-height: 300px;
     overflow-y: auto;
 }
@@ -241,8 +243,8 @@ body {
     align-items: center;
     padding: 10px;
     cursor: pointer;
-    transition: background 0.2s;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background 0.2s;
 }
 
 .suggestions-list li:hover {
