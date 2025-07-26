@@ -18,4 +18,5 @@ Front-end: HTML5, CSS3, JavaScript (Vanilla)
 
 API: The Movie Database (TMDB)
 
-Hospedagem: GitHub Pages / Vercel / Netlify
+Hospedagem: GitHub Pages 
+https://jvrondon.github.io/One-Calculo/
