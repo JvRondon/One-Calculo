@@ -1,56 +1,73 @@
 // Configurações da API
-const API_KEY = '9dc4fbf1b311b95209a262062220cca2'; // Chave V3
-const API_READ_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGM0ZmJmMWIzMTFiOTUyMDlhMjYyMDYyMjIwY2NhMiIsInN1YiI6IjY4ODQzMzZmNmEzODA0YzIwZTE2YjllZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._wsj-xGue5fRNzh7iAcVIi1O01K5vPTawM-0bVHJSy4'; // Token V4
+const API_KEY = '9dc4fbf1b311b95209a262062220cca2'; // Chave API v3
+const API_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ZGM0ZmJmMWIzMTFiOTUyMDlhMjYyMDYyMjIwY2NhMiIsInN1YiI6IjY4ODQzMzZmNmEzODA0YzIwZTE2YjllZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ._wsj-xGue5fRNzh7iAcVIi1O01K5vPTawM-0bVHJSy4'; // Token de acesso v4
 
-// Função para buscar filmes
+// Elementos do DOM
+const searchButton = document.getElementById('searchButton');
+const movieSearch = document.getElementById('movieSearch');
+const resultsDiv = document.getElementById('results');
+
+// Função principal de busca
 async function searchMovies(query) {
     try {
-        // Mostra loading
-        document.getElementById('results').innerHTML = `
-            <div class="loading">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Procurando "${query}"...</p>
-            </div>
-        `;
+        // Mostra estado de carregamento
+        showLoadingState(query);
 
-        // 1. Busca o filme (usando API KEY V3)
-        const searchResponse = await fetch(
-            `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&language=pt-BR`
-        );
-
-        if (!searchResponse.ok) throw new Error(`Erro na busca: ${searchResponse.status}`);
+        // Busca os dados do filme
+        const movie = await fetchMovieData(query);
         
-        const searchData = await searchResponse.json();
-        if (!searchData.results.length) throw new Error("Nenhum filme encontrado");
-
-        // 2. Pega os detalhes (usando TOKEN V4)
-        const movieId = searchData.results[0].id;
-        const detailsResponse = await fetch(
-            `https://api.themoviedb.org/3/movie/${movieId}?language=pt-BR`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${API_READ_TOKEN}`,
-                    'accept': 'application/json'
-                }
-            }
-        );
-
-        if (!detailsResponse.ok) throw new Error(`Erro nos detalhes: ${detailsResponse.status}`);
-        
-        const movie = await detailsResponse.json();
+        // Exibe os resultados
         showResults(movie);
-
     } catch (error) {
-        console.error("Erro completo:", error);
-        document.getElementById('results').innerHTML = `
-            <div class="error">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>${error.message}</p>
-                <small>Tente filmes como: "Vingadores", "Titanic"</small>
-                <button onclick="window.location.reload()">Tentar novamente</button>
-            </div>
-        `;
+        // Trata erros
+        showErrorState(error);
     }
+}
+
+// Função para buscar dados do filme
+async function fetchMovieData(query) {
+    const options = {
+        method: 'GET',
+        headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${API_TOKEN}`
+        }
+    };
+
+    // Primeiro busca o ID do filme
+    const searchUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&language=pt-BR&page=1`;
+    const searchResponse = await fetch(searchUrl, options);
+    
+    if (!searchResponse.ok) {
+        throw new Error(`Erro na busca: ${searchResponse.status}`);
+    }
+    
+    const searchData = await searchResponse.json();
+    
+    if (!searchData.results || searchData.results.length === 0) {
+        throw new Error('Nenhum filme encontrado');
+    }
+    
+    // Depois busca os detalhes completos
+    const movieId = searchData.results[0].id;
+    const detailsUrl = `https://api.themoviedb.org/3/movie/${movieId}?language=pt-BR`;
+    const detailsResponse = await fetch(detailsUrl, options);
+    
+    if (!detailsResponse.ok) {
+        throw new Error(`Erro nos detalhes: ${detailsResponse.status}`);
+    }
+    
+    return await detailsResponse.json();
+}
+
+// Função para mostrar estado de carregamento
+function showLoadingState(query) {
+    resultsDiv.innerHTML = `
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Procurando "${query}"...</p>
+        </div>
+    `;
 }
 
 // Função para mostrar resultados
@@ -58,8 +75,9 @@ function showResults(movie) {
     const duration = movie.runtime || 120; // Fallback se não tiver duração
     const episodes = (duration / 24).toFixed(1);
     const fullEpisodes = Math.floor(duration / 24);
+    const remainingMinutes = Math.round(duration % 24);
 
-    document.getElementById('results').innerHTML = `
+    resultsDiv.innerHTML = `
         <div class="movie-result">
             <img src="${movie.poster_path ? `https://image.tmdb.org/t/p/w300${movie.poster_path}` : 'https://i.imgur.com/JuMqQEg.png'}" 
                  alt="${movie.title}" 
@@ -73,15 +91,44 @@ function showResults(movie) {
                 <div class="episodes-container">
                     ${Array(fullEpisodes).fill().map((_, i) => `<div class="episode">${i+1}</div>`).join('')}
                 </div>
-                <small>(${fullEpisodes} completos + ${Math.round((duration % 24))} min do próximo)</small>
+                <small>(${fullEpisodes} completos + ${remainingMinutes} min do próximo)</small>
             </div>
         </div>
     `;
 }
 
-// Evento de busca
-document.getElementById('searchButton').addEventListener('click', () => {
-    const query = document.getElementById('movieSearch').value.trim();
-    if (query) searchMovies(query);
-    else alert("Digite um filme!");
+// Função para mostrar erros
+function showErrorState(error) {
+    console.error("Erro completo:", error);
+    resultsDiv.innerHTML = `
+        <div class="error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Erro!</h3>
+            <p>${error.message}</p>
+            <small>Tente filmes como: "Vingadores", "Titanic"</small>
+            <button onclick="window.location.reload()">Tentar novamente</button>
+        </div>
+    `;
+}
+
+// Event Listener para o botão de busca
+searchButton.addEventListener('click', () => {
+    const query = movieSearch.value.trim();
+    if (query) {
+        searchMovies(query);
+    } else {
+        alert("Por favor, digite um filme!");
+    }
+});
+
+// Event Listener para a tecla Enter
+movieSearch.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const query = movieSearch.value.trim();
+        if (query) {
+            searchMovies(query);
+        } else {
+            alert("Por favor, digite um filme!");
+        }
+    }
 });
