@@ -4,7 +4,7 @@ const movieInput = document.getElementById('movieSearch');
 const resultsDiv = document.getElementById('results');
 const suggestionsList = document.getElementById('suggestions');
 
-const TEMPO_EPISODIO_ONE_PIECE = 23; // minutos
+const TEMPO_EPISODIO_ONE_PIECE = 18; // minutos
 
 searchButton.addEventListener('click', () => {
     const query = movieInput.value.trim();
